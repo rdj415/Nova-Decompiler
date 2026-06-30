@@ -1,7 +1,10 @@
+print("DEBUG LINE 1: string_find definition")
 local function string_find(s, pattern)
+	print("DEBUG LINE 2: inside string_find")
 	return string.find(s, pattern, nil, true)
 end
 
+print("DEBUG LINE 4: ArrayToDict definition")
 local function ArrayToDict(t, hydridMode, valueOverride, typeStrict)
 	local tmp = {}
 
