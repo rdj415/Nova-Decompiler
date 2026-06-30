@@ -1,7 +1,5 @@
 --!native
 --!optimize 2
---!divine-intellect
--- https://discord.gg/wx4ThpAsmw
 
 local function string_find(s, pattern)
 	return string.find(s, pattern, nil, true)
