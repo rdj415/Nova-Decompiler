@@ -2194,8 +2194,7 @@ local GLOBAL_ENV = getgenv and getgenv() or _G or shared
 --- @within SynSaveInstance
 --- @field __DEBUG_MODE boolean -- This will print debug logs to console about unusual scenarios. Recommended to enable if you wish to help us improve our products and find bugs / issues with it! ___Default:___ false
 --- @field ReadMe boolean --___Default:___ true
---- @field SafeMode boolean -- Kicks you before Saving, which prevents you from being detected in any game. **HIGHLY RECOMMENDED TO KEEP ENABLED**. ___Default:___ true
---- @field KillAllScripts boolean -- Kills all scripts to further protect you from detections. SafeMode also enables this by default. **HIGHLY RECOMMENDED TO KEEP ENABLED**. ___Default:___ true
+--- @field KillAllScripts boolean -- Kills all scripts to further protect you from detections. **HIGHLY RECOMMENDED TO KEEP ENABLED**. ___Default:___ true
 --- @field ShutdownWhenDone boolean -- Shuts the game down after saveinstance is finished. ___Default:___ false
 --- @field AntiIdle boolean -- Prevents the 20-minute-Idle Kick. ___Default:___ true
 --- .Anonymous {boolean|table{UserId = string, Name = string}} -- * **RISKY:** Cleans the file of any info related to your account like: Name, UserId. This is useful for some games that might store that info in GUIs or other Instances. Might potentially mess up parts of strings that contain characters that match your Name or parts of numbers that match your UserId. Can also be a table with UserId & Name keys. ___Default:___ false
@@ -2261,7 +2260,7 @@ local GLOBAL_ENV = getgenv and getgenv() or _G or shared
 
 	local synsaveinstance = loadstring(game:HttpGet(Params.RepoURL .. Params.SSI .. ".luau", true), Params.SSI)()
 
-	local CustomOptions = { SafeMode = true, timeout = 15, SaveBytecode = true }
+	local CustomOptions = { timeout = 15, SaveBytecode = true }
 
 	synsaveinstance(CustomOptions)
 	```
@@ -2325,7 +2324,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		SaveCacheInterval = 0x1600 * 10,
 		ShowStatus = true,
 		KillAllScripts = true,
-		SafeMode = true,
 		ShutdownWhenDone = false,
 		AntiIdle = true,
 		Anonymous = false,
@@ -2600,8 +2598,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 	if __DEBUG_MODE and type(__DEBUG_MODE) ~= "function" then
 		__DEBUG_MODE = warn
 	end
-
-	local SafeMode = OPTIONS.SafeMode
 
 	local FilePath = OPTIONS.FilePath
 	local OutputDir = OPTIONS.OutputDir
@@ -4118,52 +4114,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		end
 	end
 
-	do
-		if SafeMode then
-			task.spawn(function()
-				local LocalPlayer = GetLocalPlayer()
-
-				local PlayerScripts = LocalPlayer:FindFirstChildOfClass("PlayerScripts")
-				if PlayerScripts then
-					local function construct_InstanceOverride(instance)
-						local children = instance:GetChildren()
-						InstancesOverrides[instance] = {
-							__Children = children,
-						}
-						for _, child in next, children do
-							construct_InstanceOverride(child)
-						end
-					end
-					construct_InstanceOverride(PlayerScripts)
-
-					InstancesOverrides[LocalPlayer] = {
-						__Children = LocalPlayer:GetChildren(),
-						Properties = { Name = "[" .. LocalPlayer.ClassName .. "] " .. LocalPlayer.Name },
-					}
-				end
-				local msg =
-					"[SAFEMODE] Saving..\nDo NOT leave\n[WARNING] LVL7 Executor RECOMMENDED for SAFETY\nTo Disable this: SafeMode=false (Less Protection)"
-				local function Kick()
-					LocalPlayer:Kick(msg)
-				end
-
-				Kick()
-				pcall(function()
-					Connect(service.GuiService.ErrorMessageChanged, function()
-						if service.GuiService:GetErrorMessage() ~= msg then
-							Kick()
-						end
-					end)
-				end)
-				wait_for_render()
-				-- task.wait(5)
-				-- task.delay(10, service.GuiService.ClearError, service.GuiService)
-			end)
-
-			pcall(function()
-				service.RunService:Set3dRenderingEnabled(false)
-			end)
-		end
+	-- SafeMode removed (kick was pointless)
 
 		if OPTIONS.AntiIdle then
 			local Idled = GetLocalPlayer().Idled
@@ -4312,18 +4263,6 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 		local ok, err = xpcall(save_game, function(err)
 			return debug.traceback(err)
 		end)
-
-		if SafeMode then
-			pcall(function()
-				local max = 5
-				task.delay(
-					math.clamp(max - (os.clock() - elapse_t), 0, max),
-					service.GuiService.ClearError,
-					service.GuiService
-				)
-				service.RunService:Set3dRenderingEnabled(true)
-			end)
-		end
 
 		if old_gethiddenproperty then
 			gethiddenproperty = old_gethiddenproperty
