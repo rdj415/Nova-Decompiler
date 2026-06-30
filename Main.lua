@@ -3242,12 +3242,16 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 	local function save_hierarchy(hierarchy)
 		for _, instance in next, hierarchy do
 				savedCount = savedCount + 1
-				if StatusText and savedCount % 50 == 0 and totalToSave > 0 then
+				if savedCount % 50 == 0 and totalToSave > 0 then
 					local pct = math.floor(savedCount / totalToSave * 100)
 					local elapsed = os.clock() - progressStartTime
 					local estRemaining = elapsed / (savedCount / math.max(totalToSave, 1)) - elapsed
 					local etaStr = estRemaining > 60 and string.format("%.1fm", estRemaining / 60) or string.format("%.0fs", estRemaining)
-					StatusText.Text = string.format("Saving %d/%d (%d%%) ETA: %s", savedCount, totalToSave, pct, etaStr)
+					local msg = string.format("Saving %d/%d (%d%%) ETA: %s", savedCount, totalToSave, pct, etaStr)
+					if StatusText then
+						StatusText.Text = msg
+					end
+					warn(msg)
 				end
 			local __DARKLUA_CONTINUE_64 = false
 			repeat
