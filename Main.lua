@@ -2318,7 +2318,7 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 
 		SaveCacheInterval = 0x1600 * 10,
 		ShowStatus = true,
-		KillAllScripts = true,
+		KillAllScripts = false,
 		ShutdownWhenDone = false,
 		AntiIdle = true,
 		Anonymous = false,
