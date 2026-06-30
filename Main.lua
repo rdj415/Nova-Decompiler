@@ -1,10 +1,7 @@
-print("DEBUG LINE 1: string_find definition")
 local function string_find(s, pattern)
-	print("DEBUG LINE 2: inside string_find")
 	return string.find(s, pattern, nil, true)
 end
 
-print("DEBUG LINE 4: ArrayToDict definition")
 local function ArrayToDict(t, hydridMode, valueOverride, typeStrict)
 	local tmp = {}
 
@@ -29,17 +26,18 @@ local function ArrayToDict(t, hydridMode, valueOverride, typeStrict)
 	return tmp
 end
 
-local global_container
+local global_container = {}
 do
-	local filename = "UniversalMethodFinder"
+	local umfOk, umfResult = pcall(function()
+		local filename = "UniversalMethodFinder"
 
-	local finder
-	finder, global_container = loadstring(
-		game:HttpGet("https://raw.githubusercontent.com/luau/SomeHub/main/" .. filename .. ".luau", true),
-		filename
-	)()
+		local finder
+		finder, global_container = loadstring(
+			game:HttpGet("https://raw.githubusercontent.com/luau/SomeHub/main/" .. filename .. ".luau", true),
+			filename
+		)()
 
-	finder({
+		finder({
 		-- readbinarystring = 'string.find(...,"bin",nil,true)', -- ! Could match some unwanted stuff (getbinaryindex)
 		-- request = 'string.find(...,"request",nil,true) and not string.find(...,"internal",nil,true)',
 		base64encode = 'local a={...}local b=a[1]local function c(a,b)return string.find(a,b,nil,true)end;return c(b,"encode")and(c(b,"base64")or c(string.lower(tostring(a[2])),"base64"))',
@@ -54,6 +52,12 @@ do
 		protectgui = 'string.find(...,"protect",nil,true) and string.find(...,"ui",nil,true) and not string.find(...,"un",nil,true)',
 		setthreadidentity = 'string.find(...,"identity",nil,true) and string.find(...,"set",nil,true)',
 	}, true, 10)
+	end)  -- end pcall
+
+	if not umfOk then
+		warn("UMF load failed:", umfResult)
+		global_container = {}
+	end
 end
 
 local identify_executor = identifyexecutor or getexecutorname or whatexecutor
@@ -4298,6 +4302,21 @@ local function synsaveinstance(CustomOptions, CustomOptions2)
 			game:Shutdown()
 		end
 	end
+end
+
+-- Auto-execute if options are set globally
+local novaOpts = _G.NovaDecompilerOpts or _G.NovaOptions
+if novaOpts then
+	-- Clear USSI flag from any previous crashed run
+	local env = getgenv and getgenv() or _G
+	env.USSI = nil
+	
+	local ok, err = pcall(synsaveinstance, novaOpts)
+	if not ok then
+		warn("Nova Decompiler error:", err)
+	end
+	_G.NovaDecompilerOpts = nil
+	_G.NovaOptions = nil
 end
 
 return synsaveinstance
